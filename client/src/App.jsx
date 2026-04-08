@@ -1,0 +1,68 @@
+import React, { useContext } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, AuthContext } from './context/AuthContext';
+import Layout from './components/layout/Layout';
+import CitizenLogin from './pages/Auth/CitizenLogin';
+import AuthorityLogin from './pages/Auth/AuthorityLogin';
+import Register from './pages/Auth/Register';
+import CitizenDashboard from './pages/Dashboards/CitizenDashboard';
+import SecretaryDashboard from './pages/Dashboards/SecretaryDashboard';
+import WardDashboard from './pages/Dashboards/WardDashboard';
+import HigherAuthorityDashboard from './pages/Dashboards/HigherAuthorityDashboard';
+import MyGrievances from './pages/Dashboards/MyGrievances';
+
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const { user } = useContext(AuthContext);
+  if (!user) return <Navigate to="/login/citizen" replace />;
+  if (allowedRoles && !allowedRoles.includes(user.role)) return <Navigate to="/" replace />;
+  return children;
+};
+
+const RoleBasedRouter = () => {
+  const { user } = useContext(AuthContext);
+  
+  switch(user.role) {
+    case 'citizen': return <CitizenDashboard />;
+    case 'secretary': return <SecretaryDashboard />;
+    case 'ward_member': return <WardDashboard />;
+    case 'higher_authority': return <HigherAuthorityDashboard />;
+    default: return <Navigate to="/login/citizen" replace />;
+  }
+};
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Navigate to="/login/citizen" replace />} />
+          <Route path="/login/citizen" element={<CitizenLogin />} />
+          <Route path="/login/authority" element={<AuthorityLogin />} />
+          <Route path="/register" element={<Register />} />
+          <Route 
+            path="/my-grievances" 
+            element={
+              <ProtectedRoute allowedRoles={['citizen']}>
+                <Layout>
+                  <MyGrievances />
+                </Layout>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/*" 
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <RoleBasedRouter />
+                </Layout>
+              </ProtectedRoute>
+            } 
+          />
+        </Routes>
+      </Router>
+    </AuthProvider>
+  );
+}
+
+export default App;
