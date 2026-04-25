@@ -10,6 +10,10 @@ import SecretaryDashboard from './pages/Dashboards/SecretaryDashboard';
 import WardDashboard from './pages/Dashboards/WardDashboard';
 import HigherAuthorityDashboard from './pages/Dashboards/HigherAuthorityDashboard';
 import MyGrievances from './pages/Dashboards/MyGrievances';
+import MgnregaCitizen from './pages/Dashboards/MgnregaCitizen';
+import MgnregaSecretary from './pages/Dashboards/MgnregaSecretary';
+import SecretaryCitizens from './pages/Dashboards/SecretaryCitizens';
+import SecretaryGrievances from './pages/Dashboards/SecretaryGrievances';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user } = useContext(AuthContext);
@@ -20,7 +24,6 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
 const RoleBasedRouter = () => {
   const { user } = useContext(AuthContext);
-  
   switch(user.role) {
     case 'citizen': return <CitizenDashboard />;
     case 'secretary': return <SecretaryDashboard />;
@@ -39,26 +42,42 @@ function App() {
           <Route path="/login/citizen" element={<CitizenLogin />} />
           <Route path="/login/authority" element={<AuthorityLogin />} />
           <Route path="/register" element={<Register />} />
-          <Route 
-            path="/my-grievances" 
-            element={
-              <ProtectedRoute allowedRoles={['citizen']}>
-                <Layout>
-                  <MyGrievances />
-                </Layout>
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/*" 
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <RoleBasedRouter />
-                </Layout>
-              </ProtectedRoute>
-            } 
-          />
+
+          <Route path="/my-grievances" element={
+            <ProtectedRoute allowedRoles={['citizen']}>
+              <Layout><MyGrievances /></Layout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/mgnrega" element={
+            <ProtectedRoute allowedRoles={['citizen']}>
+              <Layout><MgnregaCitizen /></Layout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/mgnrega-requests" element={
+            <ProtectedRoute allowedRoles={['secretary', 'higher_authority']}>
+              <Layout><MgnregaSecretary /></Layout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/citizens" element={
+            <ProtectedRoute allowedRoles={['secretary']}>
+              <Layout><SecretaryCitizens /></Layout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/grievances" element={
+            <ProtectedRoute allowedRoles={['secretary']}>
+              <Layout><SecretaryGrievances /></Layout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/*" element={
+            <ProtectedRoute>
+              <Layout><RoleBasedRouter /></Layout>
+            </ProtectedRoute>
+          } />
         </Routes>
       </Router>
     </AuthProvider>

@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, FileText, Pickaxe, Megaphone } from 'lucide-react';
+import { LayoutDashboard, FileText, Pickaxe, Megaphone, Users } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 
 const Sidebar = () => {
@@ -18,8 +18,11 @@ const Sidebar = () => {
     } else {
       links.push({ to: '/grievances', icon: <FileText size={20} />, label: 'Manage Grievances' });
       links.push({ to: '/announcements', icon: <Megaphone size={20} />, label: 'Announcements' });
-      if (['secretary', 'higher_authority'].includes(role)) {
-         links.push({ to: '/mgnrega-requests', icon: <Pickaxe size={20} />, label: 'MGNREGA Requests' });
+      if (role === 'secretary') {
+        links.push({ to: '/citizens', icon: <Users size={20} />, label: 'Citizens' });
+        links.push({ to: '/mgnrega-requests', icon: <Pickaxe size={20} />, label: 'MGNREGA Requests' });
+      } else if (role === 'higher_authority') {
+        links.push({ to: '/mgnrega-requests', icon: <Pickaxe size={20} />, label: 'MGNREGA Requests' });
       }
     }
 
@@ -33,10 +36,11 @@ const Sidebar = () => {
           <NavLink
             key={link.to}
             to={link.to}
+            end={link.to === '/'}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors duration-200 font-medium ${
-                isActive 
-                  ? 'bg-emerald-50 text-emerald-700' 
+                isActive
+                  ? 'bg-emerald-50 text-emerald-700'
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               }`
             }

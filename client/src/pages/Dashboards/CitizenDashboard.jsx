@@ -22,11 +22,30 @@ const CitizenDashboard = () => {
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files).slice(0, 3);
     const promises = files.map(file => {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            const max = 800;
+
+            if (width > height) {
+              if (width > max) { height *= max / width; width = max; }
+            } else {
+              if (height > max) { width *= max / height; height = max; }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.6));
+          };
+          img.src = event.target.result;
+        };
         reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
       });
     });
     Promise.all(promises).then(base64Images => {

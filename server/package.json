@@ -23,6 +23,7 @@
     "node-cron": "^4.2.1"
   },
   "devDependencies": {
+    "docx": "^9.6.1",
     "nodemon": "^3.1.14"
   }
 }
