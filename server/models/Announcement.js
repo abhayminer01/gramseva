@@ -14,6 +14,7 @@ const announcementSchema = new mongoose.Schema({
     type: String, // e.g. "all", or specific ward number
     default: 'all' 
   },
+  createdAt: { type: Date, expires: '10d', default: Date.now }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Announcement', announcementSchema);

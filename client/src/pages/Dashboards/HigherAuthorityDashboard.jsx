@@ -9,21 +9,42 @@ const HigherAuthorityDashboard = () => {
     total: 0, pending: 0, inProgress: 0, resolved: 0, escalated: 0
   });
 
+  const [escalatedGrievances, setEscalatedGrievances] = useState([]);
+  const [escalatedMgnrega, setEscalatedMgnrega] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/grievances');
-        const data = res.data;
-        // High level overview sees everything
+        const [grievanceRes, mgnregaRes] = await Promise.all([
+           axios.get('http://localhost:5000/api/grievances'),
+           axios.get('http://localhost:5000/api/mgnrega')
+        ]);
+        
+        const gData = grievanceRes.data;
+        const mData = mgnregaRes.data;
+
+        // Escalated Grievances
+        const eGrievances = gData.filter(g => g.status === 'escalated' || g.escalatedToHigher);
+        setEscalatedGrievances(eGrievances);
+
+        // Auto-escalated MGNREGA requests (pending > 7 days)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const eMgnrega = mData.filter(r => r.status === 'pending' && new Date(r.createdAt) < sevenDaysAgo);
+        setEscalatedMgnrega(eMgnrega);
+
         setStats({
-          total: data.length,
-          pending: data.filter(g => g.status === 'pending').length,
-          inProgress: data.filter(g => g.status === 'in_progress').length,
-          resolved: data.filter(g => g.status === 'resolved').length,
-          escalated: data.filter(g => g.status === 'escalated').length,
+          total: gData.length,
+          pending: gData.filter(g => g.status === 'pending').length,
+          inProgress: gData.filter(g => g.status === 'in_progress').length,
+          resolved: gData.filter(g => g.status === 'resolved').length,
+          escalated: eGrievances.length,
         });
       } catch (error) {
         console.error("Failed to fetch stats", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchStats();
@@ -61,12 +82,60 @@ const HigherAuthorityDashboard = () => {
         ))}
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 mt-6 p-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">Critical Escalations</h2>
-        <div className="text-center text-gray-500 py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-          Escalated grid will automatically pull systemic failures over SLA limits here.
+      {loading ? (
+         <div className="flex justify-center py-12"><div className="animate-spin h-8 w-8 border-b-2 border-purple-600 rounded-full"></div></div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+           <div className="bg-white rounded-xl shadow-sm border border-gray-200 mt-6 p-6">
+             <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2"><AlertTriangle size={20} className="text-red-500"/> Escalated Grievances</h2>
+             {escalatedGrievances.length === 0 ? (
+               <p className="text-gray-500 italic text-sm text-center py-8">No escalated grievances.</p>
+             ) : (
+               <div className="space-y-4">
+                  {escalatedGrievances.map(g => (
+                     <div key={g._id} className="border border-red-100 bg-red-50/30 p-4 rounded-xl">
+                        <div className="flex justify-between items-start mb-1">
+                           <span className="font-bold text-gray-900 text-sm line-clamp-1">{g.title}</span>
+                           <span className="text-xs text-gray-500 whitespace-nowrap">{new Date(g.createdAt).toLocaleDateString()}</span>
+                        </div>
+                        <p className="text-xs text-gray-600 mb-2"><strong>Category:</strong> {g.category} {g.priority && <span className="ml-1 uppercase text-red-600 font-bold">({g.priority} P)</span>}</p>
+                        <div className="bg-white p-2 rounded-lg border border-red-50 text-xs">
+                           <p className="font-semibold text-gray-700">Local Body Breakdown:</p>
+                           <p className="text-gray-500">District: {g.district}</p>
+                           <p className="text-gray-500">{g.localBodyType}: {g.localBodyName} (Ward {g.ward || 'N/A'})</p>
+                           {g.actionReason && <p className="text-red-700 mt-1"><i>Note: {g.actionReason}</i></p>}
+                        </div>
+                     </div>
+                  ))}
+               </div>
+             )}
+           </div>
+
+           <div className="bg-white rounded-xl shadow-sm border border-gray-200 mt-6 p-6">
+             <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2"><Clock size={20} className="text-orange-500"/> SLA Breached MGNREGA (&gt;7 Days)</h2>
+             {escalatedMgnrega.length === 0 ? (
+               <p className="text-gray-500 italic text-sm text-center py-8">No SLA breached applications.</p>
+             ) : (
+               <div className="space-y-4">
+                  {escalatedMgnrega.map(m => (
+                     <div key={m._id} className="border border-orange-100 bg-orange-50/30 p-4 rounded-xl">
+                        <div className="flex justify-between items-start mb-1">
+                           <span className="font-bold text-gray-900 text-sm line-clamp-1">{m.title}</span>
+                           <span className="text-xs text-gray-500 whitespace-nowrap">{new Date(m.createdAt).toLocaleDateString()}</span>
+                        </div>
+                        <p className="text-xs text-gray-600 mb-2"><strong>Applicant:</strong> {m.citizenId?.name || 'Unknown'}</p>
+                        <div className="bg-white p-2 rounded-lg border border-orange-50 text-xs">
+                           <p className="font-semibold text-gray-700">Responsibility Area:</p>
+                           <p className="text-gray-500">District: {m.district}</p>
+                           <p className="text-gray-500">{m.localBodyType}: {m.localBodyName} (Ward {m.wardNumber || 'N/A'})</p>
+                        </div>
+                     </div>
+                  ))}
+               </div>
+             )}
+           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

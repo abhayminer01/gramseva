@@ -182,7 +182,7 @@ const deleteGrievance = async (req, res) => {
 // @access  Private (Ward Member)
 const triageGrievance = async (req, res) => {
   try {
-    const { action, reason } = req.body;
+    const { action, reason, priority } = req.body;
     const grievance = await Grievance.findById(req.params.id);
     if (!grievance) return res.status(404).json({ message: 'Grievance not found' });
 
@@ -190,6 +190,7 @@ const triageGrievance = async (req, res) => {
       grievance.status = 'escalated';
       grievance.escalatedToHigher = true;
       grievance.actionReason = reason;
+      if (priority) grievance.priority = priority;
     } else if (action === 'decline') {
       grievance.status = 'rejected';
       grievance.actionReason = reason;
@@ -230,6 +231,36 @@ const secretaryActionGrievance = async (req, res) => {
   }
 };
 
+// @desc    Get all grievances (Admin only)
+// @route   GET /api/grievances/admin/all
+// @access  Private (Admin)
+const getAllGrievancesAdmin = async (req, res) => {
+  try {
+    const grievances = await Grievance.find()
+       .populate('createdBy', 'name phone localBodyName wardNumber')
+       .sort({ createdAt: -1 });
+    res.json(grievances);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Delete any grievance (Admin only)
+// @route   DELETE /api/grievances/admin/:id
+// @access  Private (Admin)
+const deleteGrievanceAdmin = async (req, res) => {
+  try {
+    const grievance = await Grievance.findById(req.params.id);
+    if (!grievance) {
+      return res.status(404).json({ message: 'Grievance not found' });
+    }
+    await grievance.deleteOne();
+    res.json({ message: 'Grievance completely removed by Admin', id: req.params.id });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = { 
   createGrievance, 
   getGrievances, 
@@ -239,5 +270,7 @@ module.exports = {
   getComments, 
   deleteGrievance, 
   triageGrievance,
-  secretaryActionGrievance
+  secretaryActionGrievance,
+  getAllGrievancesAdmin,
+  deleteGrievanceAdmin
 };

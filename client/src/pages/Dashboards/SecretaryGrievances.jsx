@@ -19,8 +19,18 @@ const SecretaryGrievances = () => {
   const fetchGrievances = async () => {
     try {
       const res = await axios.get('http://localhost:5000/api/grievances');
-      // Only show escalated ones
-      setGrievances(res.data.filter(g => g.status === 'escalated' || g.escalatedToHigher));
+      // Only show escalated ones, sort by priority and then date
+      const priorityWeight = { 'high': 3, 'medium': 2, 'low': 1, undefined: 0 };
+      
+      const escalated = res.data.filter(g => g.status === 'escalated' || g.escalatedToHigher);
+      escalated.sort((a, b) => {
+         const pA = priorityWeight[a.priority] || 0;
+         const pB = priorityWeight[b.priority] || 0;
+         if (pA !== pB) return pB - pA;
+         return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+      
+      setGrievances(escalated);
     } catch (error) {
       console.error(error);
     } finally {
@@ -99,11 +109,22 @@ const SecretaryGrievances = () => {
                 </div>
               )}
               <div className="p-5">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-orange-100 text-orange-800">
-                    Escalated
-                  </span>
-                  <span className="text-xs text-gray-400">{new Date(g.createdAt).toLocaleDateString()}</span>
+                <div className="flex justify-between items-start mb-2 gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    <span className="px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-orange-100 text-orange-800">
+                      Escalated
+                    </span>
+                    {g.priority && (
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                        g.priority === 'high' ? 'bg-red-100 text-red-800 border border-red-200' :
+                        g.priority === 'medium' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
+                        'bg-blue-100 text-blue-800 border border-blue-200'
+                      }`}>
+                        {g.priority} Priority
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs text-gray-400 whitespace-nowrap">{new Date(g.createdAt).toLocaleDateString()}</span>
                 </div>
                 <h3 className="text-base font-bold text-gray-900 mb-1 line-clamp-1">{g.title}</h3>
                 <p className="text-gray-500 text-sm line-clamp-2 mb-3">{g.description}</p>
@@ -140,6 +161,15 @@ const SecretaryGrievances = () => {
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-medium uppercase tracking-wider bg-orange-100 text-orange-800">
                   Escalated
                 </span>
+                {selectedGrievance.priority && (
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${
+                    selectedGrievance.priority === 'high' ? 'bg-red-100 text-red-800 border border-red-200' :
+                    selectedGrievance.priority === 'medium' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
+                    'bg-blue-100 text-blue-800 border border-blue-200'
+                  }`}>
+                    {selectedGrievance.priority}
+                  </span>
+                )}
               </div>
               <button onClick={closeModal} className="text-gray-400 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 p-2 rounded-full transition-colors">
                 <X size={20} />

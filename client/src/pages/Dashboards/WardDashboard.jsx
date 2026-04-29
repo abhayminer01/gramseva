@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { FileText, Clock, CheckCircle, AlertTriangle, Map, ThumbsUp, MessageSquare, AlertCircle, X, Send, ArrowRight, XCircle } from 'lucide-react';
+import { FileText, Clock, CheckCircle, AlertTriangle, Map, ThumbsUp, MessageSquare, AlertCircle, X, Send, ArrowRight, XCircle, Megaphone } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 
 const WardDashboard = () => {
@@ -20,7 +20,31 @@ const WardDashboard = () => {
   // Triage State
   const [triageAction, setTriageAction] = useState(null); // 'forward' | 'decline' | null
   const [triageReason, setTriageReason] = useState('');
+  const [triagePriority, setTriagePriority] = useState('medium');
   const [triaging, setTriaging] = useState(false);
+
+  // Tabs
+  const [activeTab, setActiveTab] = useState('pending');
+
+  // Announcement State
+  const [showAnnounceModal, setShowAnnounceModal] = useState(false);
+  const [announceForm, setAnnounceForm] = useState({ title: '', content: '', type: 'announcement', targetAudience: 'all' });
+  const [postingAnnounce, setPostingAnnounce] = useState(false);
+
+  const handlePostAnnouncement = async (e) => {
+    e.preventDefault();
+    setPostingAnnounce(true);
+    try {
+      await axios.post('http://localhost:5000/api/announcements', announceForm);
+      setShowAnnounceModal(false);
+      setAnnounceForm({ title: '', content: '', type: 'announcement', targetAudience: 'all' });
+      alert("Announcement published successfully!");
+    } catch (err) {
+      alert("Failed to publish announcement");
+    } finally {
+      setPostingAnnounce(false);
+    }
+  };
 
   useEffect(() => {
     const fetchGrievances = async () => {
@@ -85,6 +109,7 @@ const WardDashboard = () => {
     setComments([]);
     setTriageAction(null);
     setTriageReason('');
+    setTriagePriority('medium');
   };
 
   const submitTriage = async (e) => {
@@ -94,7 +119,8 @@ const WardDashboard = () => {
     try {
       const res = await axios.put(`http://localhost:5000/api/grievances/${selectedGrievance._id}/triage`, {
         action: triageAction,
-        reason: triageReason
+        reason: triageReason,
+        priority: triageAction === 'forward' ? triagePriority : undefined
       });
       // Replace in local list 
       setGrievances(prev => prev.map(g => g._id === selectedGrievance._id ? res.data : g));
@@ -108,11 +134,20 @@ const WardDashboard = () => {
 
   return (
     <div className="space-y-6 relative">
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-blue-100 mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Ward Member Dashboard</h1>
-        <p className="text-gray-500 text-sm mt-1 flex items-center">
-            <Map size={16} className="mr-1" /> Monitoring Ward {user.wardNumber} in {user.localBodyName}
-        </p>
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-blue-100 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Ward Member Dashboard</h1>
+          <p className="text-gray-500 text-sm mt-1 flex items-center">
+              <Map size={16} className="mr-1" /> Monitoring Ward {user.wardNumber} in {user.localBodyName}
+          </p>
+        </div>
+        <button 
+           onClick={() => setShowAnnounceModal(true)}
+           className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm self-start md:self-auto"
+        >
+          <Megaphone size={20} />
+          Create Announcement
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -129,24 +164,39 @@ const WardDashboard = () => {
         ))}
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 mt-6 p-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">Ward Feed</h2>
+      <div className="flex border-b border-gray-200 mt-6">
+         <button onClick={() => setActiveTab('pending')} className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors flex-1 sm:flex-none ${activeTab === 'pending' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Pending Action</button>
+         <button onClick={() => setActiveTab('escalated')} className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors flex-1 sm:flex-none ${activeTab === 'escalated' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Forwarded (Escalated)</button>
+         <button onClick={() => setActiveTab('resolved')} className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors flex-1 sm:flex-none ${activeTab === 'resolved' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Resolved / Decided</button>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 mt-4 p-6">
         
         {loading ? (
           <div className="flex justify-center p-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
-        ) : grievances.length === 0 ? (
+        ) : grievances.filter(g => {
+            if (activeTab === 'pending') return g.status === 'pending' || g.status === 'accepted';
+            if (activeTab === 'escalated') return g.status === 'escalated';
+            if (activeTab === 'resolved') return g.status === 'resolved' || g.status === 'rejected';
+            return true;
+        }).length === 0 ? (
           <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
             <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
               <AlertCircle size={32} className="text-gray-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900">No grievances in this ward</h3>
-            <p className="mt-1 text-gray-500">Citizens in Ward {user.wardNumber} haven't reported any issues yet.</p>
+            <h3 className="text-lg font-medium text-gray-900">No {activeTab} grievances</h3>
+            <p className="mt-1 text-gray-500">There are no issues in the current category.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-4">
-            {grievances.map(g => (
+            {grievances.filter(g => {
+                if (activeTab === 'pending') return g.status === 'pending' || g.status === 'accepted';
+                if (activeTab === 'escalated') return g.status === 'escalated';
+                if (activeTab === 'resolved') return g.status === 'resolved' || g.status === 'rejected';
+                return true;
+            }).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).map(g => (
               <div 
                  key={g._id} 
                  onClick={() => openGrievance(g)}
@@ -252,6 +302,22 @@ const WardDashboard = () => {
                           <h4 className={`font-bold mb-2 flex items-center gap-2 ${triageAction === 'forward' ? 'text-orange-700' : 'text-red-700'}`}>
                              {triageAction === 'forward' ? <><ArrowRight size={18}/> Providing note for Secretary</> : <><XCircle size={18}/> Providing reason for Decline</>}
                           </h4>
+
+                          {triageAction === 'forward' && (
+                            <div className="mb-4">
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Set Priority Level</label>
+                              <select 
+                                value={triagePriority} 
+                                onChange={e => setTriagePriority(e.target.value)} 
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm transition-shadow font-medium"
+                              >
+                                <option value="low" className="text-gray-700">LOW - Requires standard attention</option>
+                                <option value="medium" className="text-orange-600 font-semibold">MEDIUM - Needs timely action</option>
+                                <option value="high" className="text-red-600 font-bold">HIGH - Critical, act immediately</option>
+                              </select>
+                            </div>
+                          )}
+
                           <textarea 
                              required
                              rows="3"
@@ -306,6 +372,50 @@ const WardDashboard = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {showAnnounceModal && (
+         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+               <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2"><Megaphone size={18} className="text-blue-600"/> New Announcement</h3>
+                  <button onClick={() => setShowAnnounceModal(false)} className="text-gray-400 hover:text-gray-600">
+                     <X size={20} />
+                  </button>
+               </div>
+               <form onSubmit={handlePostAnnouncement} className="p-6 space-y-4">
+                  <div>
+                     <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                     <input required type="text" value={announceForm.title} onChange={e => setAnnounceForm({...announceForm, title: e.target.value})} placeholder="E.g. Ward Meeting tomorrow" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow" />
+                  </div>
+                  <div>
+                     <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                     <select value={announceForm.type} onChange={e => setAnnounceForm({...announceForm, type: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow">
+                        <option value="announcement">General Announcement</option>
+                        <option value="notification">Critical Notification</option>
+                     </select>
+                  </div>
+                  <div>
+                     <label className="block text-sm font-medium text-gray-700 mb-1">Target Audience</label>
+                     <select disabled value={announceForm.targetAudience} className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg outline-none cursor-not-allowed">
+                        <option value="all">Entire Local Body (All Wards)</option>
+                     </select>
+                     <p className="text-xs text-gray-500 mt-1">Ward Members broadcast to all citizens in the local body by default.</p>
+                  </div>
+                  <div>
+                     <label className="block text-sm font-medium text-gray-700 mb-1">Message Content</label>
+                     <textarea required rows="4" value={announceForm.content} onChange={e => setAnnounceForm({...announceForm, content: e.target.value})} placeholder="Provide details here. This message will auto-expire after 10 days." className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow resize-none"></textarea>
+                  </div>
+                  
+                  <div className="pt-4 flex gap-3">
+                     <button type="button" onClick={() => setShowAnnounceModal(false)} className="flex-1 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">Cancel</button>
+                     <button type="submit" disabled={postingAnnounce} className={`flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm ${postingAnnounce ? 'opacity-70 cursor-not-allowed' : ''}`}>
+                         {postingAnnounce ? 'Publishing...' : 'Publish'}
+                     </button>
+                  </div>
+               </form>
+            </div>
+         </div>
       )}
     </div>
   );

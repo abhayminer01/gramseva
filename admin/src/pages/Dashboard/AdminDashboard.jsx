@@ -11,6 +11,8 @@ const AdminDashboard = () => {
 
   const [stats, setStats] = useState({ users: 0, grievances: 0, bodies: 0, active: 0 });
   const [allUsers, setAllUsers] = useState([]);
+  const [allGrievances, setAllGrievances] = useState([]);
+  const [searchGrievance, setSearchGrievance] = useState('');
   
   const [formData, setFormData] = useState({
     name: '', phone: '', password: '', role: 'ward_member', localBodyName: '',
@@ -37,8 +39,19 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchGrievances = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/grievances/admin/all');
+      setAllGrievances(res.data);
+      setStats(prev => ({ ...prev, grievances: res.data.length }));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
+    fetchGrievances();
   }, []);
 
   const typeMap = {
@@ -125,6 +138,16 @@ const AdminDashboard = () => {
       fetchUsers();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to delete account');
+    }
+  };
+
+  const handleDeleteGrievance = async (gId) => {
+    if (!window.confirm("Are you sure you want to permanently delete this grievance from the database? This cannot be undone.")) return;
+    try {
+      await axios.delete(`http://localhost:5000/api/grievances/admin/${gId}`);
+      fetchGrievances();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to delete grievance');
     }
   };
 
@@ -215,18 +238,24 @@ const AdminDashboard = () => {
       </div>
 
       {/* Admin Section Tabs */}
-      <div className="flex border-b border-gray-200 mt-6 md:mt-8">
+      <div className="flex overflow-x-auto border-b border-gray-200 mt-6 md:mt-8">
          <button 
            onClick={() => setActiveTab('manage')} 
-           className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors flex-1 sm:flex-none ${activeTab === 'manage' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+           className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors whitespace-nowrap ${activeTab === 'manage' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
          >
            Manage System Users
          </button>
          <button 
            onClick={() => setActiveTab('create')} 
-           className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors flex-1 sm:flex-none ${activeTab === 'create' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+           className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors whitespace-nowrap ${activeTab === 'create' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
          >
            Create Authority Account
+         </button>
+         <button 
+           onClick={() => setActiveTab('grievances')} 
+           className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors whitespace-nowrap ${activeTab === 'grievances' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+         >
+           Global Grievance Management
          </button>
       </div>
 
@@ -385,6 +414,80 @@ const AdminDashboard = () => {
                     </td>
                   </tr>
                 ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        )}
+
+        {/* Global Grievances Tab */}
+        {activeTab === 'grievances' && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-[700px]">
+          <div className="p-6 border-b border-gray-200 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">Global Grievance Database</h2>
+              <p className="text-sm text-gray-500 mt-1">Review and manage support tickets logged across all districts.</p>
+            </div>
+            <div>
+               <input 
+                 type="text" 
+                 placeholder="Search by title or district..." 
+                 value={searchGrievance}
+                 onChange={e => setSearchGrievance(e.target.value)}
+                 className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-full sm:w-64"
+               />
+            </div>
+          </div>
+          <div className="overflow-y-auto flex-1 p-0">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50 sticky top-0">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Grievance Info</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status / Priority</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Location</th>
+                  <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {allGrievances.filter(g => 
+                   g.title.toLowerCase().includes(searchGrievance.toLowerCase()) || 
+                   g.district.toLowerCase().includes(searchGrievance.toLowerCase())
+                 ).map(g => (
+                  <tr key={g._id} className="hover:bg-blue-50/30 transition-colors">
+                    <td className="px-6 py-4">
+                       <div className="text-sm font-bold text-gray-900 line-clamp-1">{g.title}</div>
+                       <div className="text-xs text-gray-500">{new Date(g.createdAt).toLocaleDateString()} by {g.createdBy?.name || 'Unknown'}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                       <div className="flex flex-col gap-1 items-start">
+                         <span className="px-2 py-0.5 inline-flex text-xs leading-5 font-bold rounded-full capitalize bg-gray-100 text-gray-800 border border-gray-200">
+                           {g.status.replace('_', ' ')}
+                         </span>
+                         {g.priority && (
+                            <span className="px-2 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded uppercase border border-gray-200 text-gray-600">
+                              {g.priority} Priority
+                            </span>
+                         )}
+                       </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                       <div className="text-sm font-medium text-gray-900">{g.district}</div>
+                       <div className="text-xs text-gray-500">{g.localBodyName} (Ward {g.ward})</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                       <button 
+                         onClick={() => handleDeleteGrievance(g._id)}
+                         className="inline-flex items-center justify-center bg-white border border-red-100 text-red-500 hover:text-white hover:bg-red-500 transition-all p-2 rounded-lg shadow-sm"
+                         title="Delete Grievance Permanently"
+                       >
+                         <Trash2 size={16} />
+                       </button>
+                    </td>
+                  </tr>
+                ))}
+                {allGrievances.length === 0 && (
+                   <tr><td colSpan="4" className="text-center py-8 text-gray-500 italic text-sm">No grievances found in database.</td></tr>
+                )}
               </tbody>
             </table>
           </div>

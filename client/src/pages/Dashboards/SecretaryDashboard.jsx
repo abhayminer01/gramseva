@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import {
   Users, Shield, Pickaxe, AlertTriangle, CheckCircle, Clock,
-  TrendingUp, FileText, XCircle, UserCheck, Activity
+  TrendingUp, FileText, XCircle, UserCheck, Activity, Megaphone, X
 } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 
@@ -27,6 +27,25 @@ const SecretaryDashboard = () => {
   const [escalatedGrievances, setEscalatedGrievances] = useState([]);
   const [mgnregaRequests, setMgnregaRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [showAnnounceModal, setShowAnnounceModal] = useState(false);
+  const [announceForm, setAnnounceForm] = useState({ title: '', content: '', type: 'announcement', targetAudience: 'all' });
+  const [postingAnnounce, setPostingAnnounce] = useState(false);
+
+  const handlePostAnnouncement = async (e) => {
+    e.preventDefault();
+    setPostingAnnounce(true);
+    try {
+      await axios.post('http://localhost:5000/api/announcements', announceForm);
+      setShowAnnounceModal(false);
+      setAnnounceForm({ title: '', content: '', type: 'announcement', targetAudience: 'all' });
+      alert("Announcement published successfully!");
+    } catch (err) {
+      alert("Failed to publish announcement");
+    } finally {
+      setPostingAnnounce(false);
+    }
+  };
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -68,15 +87,24 @@ const SecretaryDashboard = () => {
       {/* Welcome Banner */}
       <div className="relative overflow-hidden bg-gradient-to-br from-emerald-700 via-emerald-600 to-teal-500 rounded-2xl shadow-lg p-8 text-white">
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 70% 50%, white 0%, transparent 60%)' }} />
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-1">
-            <Shield size={18} className="text-emerald-200" />
-            <span className="text-emerald-200 text-sm font-medium uppercase tracking-widest">Secretary Workspace</span>
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Shield size={18} className="text-emerald-200" />
+              <span className="text-emerald-200 text-sm font-medium uppercase tracking-widest">Secretary Workspace</span>
+            </div>
+            <h1 className="text-3xl font-extrabold tracking-tight">Welcome, {user.name}</h1>
+            <p className="text-emerald-100 mt-1 text-sm">
+              {user.localBodyType} of <span className="font-semibold text-white">{user.localBodyName}</span>, {user.district}
+            </p>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Welcome, {user.name}</h1>
-          <p className="text-emerald-100 mt-1 text-sm">
-            {user.localBodyType} of <span className="font-semibold text-white">{user.localBodyName}</span>, {user.district}
-          </p>
+          <button 
+             onClick={() => setShowAnnounceModal(true)}
+             className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm self-start md:self-auto border border-white/30"
+          >
+            <Megaphone size={20} />
+            Publish Announcement
+          </button>
         </div>
         <div className="absolute right-8 top-1/2 -translate-y-1/2 opacity-10">
           <Activity size={120} strokeWidth={1} />
@@ -214,6 +242,53 @@ const SecretaryDashboard = () => {
           </div>
         )}
       </div>
+
+      {showAnnounceModal && (
+         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+               <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2"><Megaphone size={18} className="text-emerald-600"/> New Announcement</h3>
+                  <button onClick={() => setShowAnnounceModal(false)} className="text-gray-400 hover:text-gray-600">
+                     <X size={20} />
+                  </button>
+               </div>
+               <form onSubmit={handlePostAnnouncement} className="p-6 space-y-4">
+                  <div>
+                     <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                     <input required type="text" value={announceForm.title} onChange={e => setAnnounceForm({...announceForm, title: e.target.value})} placeholder="E.g. Water supply interruption" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow" />
+                  </div>
+                  <div>
+                     <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                     <select value={announceForm.type} onChange={e => setAnnounceForm({...announceForm, type: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow">
+                        <option value="announcement">General Announcement</option>
+                        <option value="notification">Critical Notification</option>
+                     </select>
+                  </div>
+                  <div>
+                     <label className="block text-sm font-medium text-gray-700 mb-1">Target Audience</label>
+                     <select value={announceForm.targetAudience} onChange={e => setAnnounceForm({...announceForm, targetAudience: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow">
+                        <option value="all">Entire Local Body (All Wards)</option>
+                        <option value="ward_specific">Specific Ward (Type Below)</option>
+                     </select>
+                     {announceForm.targetAudience !== 'all' && (
+                        <input required type="text" onChange={e => setAnnounceForm({...announceForm, targetAudience: e.target.value})} placeholder="Ward Number" className="w-full mt-2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow" />
+                     )}
+                  </div>
+                  <div>
+                     <label className="block text-sm font-medium text-gray-700 mb-1">Message Content</label>
+                     <textarea required rows="4" value={announceForm.content} onChange={e => setAnnounceForm({...announceForm, content: e.target.value})} placeholder="Provide details here. This message will auto-expire after 10 days." className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow resize-none"></textarea>
+                  </div>
+                  
+                  <div className="pt-4 flex gap-3">
+                     <button type="button" onClick={() => setShowAnnounceModal(false)} className="flex-1 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">Cancel</button>
+                     <button type="submit" disabled={postingAnnounce} className={`flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium shadow-sm ${postingAnnounce ? 'opacity-70 cursor-not-allowed' : ''}`}>
+                         {postingAnnounce ? 'Publishing...' : 'Publish'}
+                     </button>
+                  </div>
+               </form>
+            </div>
+         </div>
+      )}
 
     </div>
   );
