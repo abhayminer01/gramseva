@@ -28,7 +28,7 @@ const WardDashboard = () => {
 
   // Announcement State
   const [showAnnounceModal, setShowAnnounceModal] = useState(false);
-  const [announceForm, setAnnounceForm] = useState({ title: '', content: '', type: 'announcement', targetAudience: 'all' });
+  const [announceForm, setAnnounceForm] = useState({ title: '', content: '', type: 'announcement', targetAudience: user?.wardNumber || '' });
   const [postingAnnounce, setPostingAnnounce] = useState(false);
 
   const handlePostAnnouncement = async (e) => {
@@ -37,7 +37,7 @@ const WardDashboard = () => {
     try {
       await axios.post('http://localhost:5000/api/announcements', announceForm);
       setShowAnnounceModal(false);
-      setAnnounceForm({ title: '', content: '', type: 'announcement', targetAudience: 'all' });
+      setAnnounceForm({ title: '', content: '', type: 'announcement', targetAudience: user?.wardNumber || '' });
       alert("Announcement published successfully!");
     } catch (err) {
       alert("Failed to publish announcement");
@@ -397,10 +397,10 @@ const WardDashboard = () => {
                   </div>
                   <div>
                      <label className="block text-sm font-medium text-gray-700 mb-1">Target Audience</label>
-                     <select disabled value={announceForm.targetAudience} className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg outline-none cursor-not-allowed">
-                        <option value="all">Entire Local Body (All Wards)</option>
+                     <select disabled value={announceForm.targetAudience} className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg outline-none cursor-not-allowed text-gray-600 font-medium">
+                        <option value={user?.wardNumber}>Ward {user?.wardNumber} Citizens Only</option>
                      </select>
-                     <p className="text-xs text-gray-500 mt-1">Ward Members broadcast to all citizens in the local body by default.</p>
+                     <p className="text-xs text-gray-500 mt-1">As a Ward Member, announcements are restricted to your ward.</p>
                   </div>
                   <div>
                      <label className="block text-sm font-medium text-gray-700 mb-1">Message Content</label>

@@ -14,6 +14,7 @@ import MgnregaCitizen from './pages/Dashboards/MgnregaCitizen';
 import MgnregaSecretary from './pages/Dashboards/MgnregaSecretary';
 import SecretaryCitizens from './pages/Dashboards/SecretaryCitizens';
 import SecretaryGrievances from './pages/Dashboards/SecretaryGrievances';
+import Announcements from './pages/Dashboards/Announcements';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user } = useContext(AuthContext);
@@ -70,6 +71,12 @@ function App() {
           <Route path="/grievances" element={
             <ProtectedRoute allowedRoles={['secretary']}>
               <Layout><SecretaryGrievances /></Layout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/announcements" element={
+            <ProtectedRoute>
+              <Layout><Announcements /></Layout>
             </ProtectedRoute>
           } />
 

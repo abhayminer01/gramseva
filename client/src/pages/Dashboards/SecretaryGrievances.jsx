@@ -99,50 +99,78 @@ const SecretaryGrievances = () => {
             <div
               key={g._id}
               onClick={() => { setSelectedGrievance(g); setAction(null); setReason(''); }}
-              className="bg-white rounded-xl border border-orange-200 shadow-sm overflow-hidden hover:shadow-lg transition-all cursor-pointer transform hover:-translate-y-1"
+              className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md hover:border-emerald-300 transition-all cursor-pointer flex flex-col"
             >
-              {g.images && g.images.length > 0 ? (
-                <img src={g.images[0]} alt="Grievance" className="w-full h-40 object-cover" />
-              ) : (
-                <div className="w-full h-40 bg-orange-50 flex items-center justify-center border-b border-orange-100">
-                  <AlertTriangle size={28} className="text-orange-300" />
-                </div>
-              )}
-              <div className="p-5">
-                <div className="flex justify-between items-start mb-2 gap-2">
-                  <div className="flex flex-wrap gap-2">
-                    <span className="px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-orange-100 text-orange-800">
-                      Escalated
-                    </span>
-                    {g.priority && (
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                        g.priority === 'high' ? 'bg-red-100 text-red-800 border border-red-200' :
-                        g.priority === 'medium' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
-                        'bg-blue-100 text-blue-800 border border-blue-200'
-                      }`}>
-                        {g.priority} Priority
-                      </span>
-                    )}
+              {/* Image Section */}
+              <div className="relative h-48 bg-gray-50 border-b border-gray-100 flex-shrink-0">
+                {g.images && g.images.length > 0 ? (
+                  <img 
+                    src={g.images[0]} 
+                    alt="Grievance" 
+                    className="w-full h-full object-cover" 
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                    <AlertTriangle size={32} className="mb-2 opacity-50" />
+                    <span className="text-xs font-medium uppercase tracking-wider">No Image Provided</span>
                   </div>
-                  <span className="text-xs text-gray-400 whitespace-nowrap">{new Date(g.createdAt).toLocaleDateString()}</span>
+                )}
+                
+                {/* Clean Date Badge */}
+                <div className="absolute top-3 right-3 bg-white/95 px-2.5 py-1 rounded shadow-sm border border-gray-100">
+                  <span className="text-[11px] font-semibold text-gray-600">
+                    {new Date(g.createdAt).toLocaleDateString()}
+                  </span>
                 </div>
-                <h3 className="text-base font-bold text-gray-900 mb-1 line-clamp-1">{g.title}</h3>
-                <p className="text-gray-500 text-sm line-clamp-2 mb-3">{g.description}</p>
+              </div>
+
+              {/* Content Section */}
+              <div className="p-5 flex-1 flex flex-col">
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <span className="px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-orange-100 text-orange-700">
+                    Escalated
+                  </span>
+                  {g.priority && (
+                    <span className={`px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                      g.priority === 'high' ? 'bg-red-50 text-red-700 border border-red-100' :
+                      g.priority === 'medium' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
+                      'bg-blue-50 text-blue-700 border border-blue-100'
+                    }`}>
+                      {g.priority}
+                    </span>
+                  )}
+                </div>
+                
+                <h3 className="text-base font-bold text-gray-900 mb-1.5 line-clamp-1">
+                  {g.title}
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed line-clamp-2 mb-4">
+                  {g.description}
+                </p>
 
                 {g.actionReason && (
-                  <div className="bg-orange-50 p-2.5 rounded-lg border border-orange-100 mb-3">
-                    <span className="text-xs font-bold text-orange-800 uppercase tracking-wider block mb-0.5">Ward Note:</span>
-                    <span className="text-xs text-orange-900 italic">"{g.actionReason}"</span>
+                  <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 mt-auto mb-4">
+                    <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block mb-1">Ward Note</span>
+                    <span className="text-sm text-gray-700 italic line-clamp-2">"{g.actionReason}"</span>
                   </div>
                 )}
 
-                <div className="flex items-center gap-2 text-xs text-gray-500 pt-3 border-t border-gray-100">
-                  <span className="bg-gray-100 px-2 py-0.5 rounded capitalize">{g.category}</span>
-                  <span>·</span>
-                  <MapPin size={11} className="text-gray-400" />
-                  <span>Ward {g.ward}</span>
-                  <span>·</span>
-                  <span className="font-medium">{g.createdBy?.name || 'Citizen'}</span>
+                {/* Footer Section */}
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto">
+                  <div className="flex items-center gap-2">
+                    <div className="h-7 w-7 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-100">
+                      <span className="text-xs font-bold">
+                        {g.createdBy?.name ? g.createdBy.name.charAt(0).toUpperCase() : 'C'}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-semibold text-gray-900">{g.createdBy?.name || 'Citizen'}</span>
+                      <span className="text-[10px] text-gray-500">Ward {g.ward}</span>
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                    {g.category}
+                  </span>
                 </div>
               </div>
             </div>

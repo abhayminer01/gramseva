@@ -8,7 +8,7 @@ const announcementSchema = new mongoose.Schema({
     enum: ['announcement', 'notification'],
     default: 'announcement',
   },
-  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Authority', required: true },
   localBody: { type: String, required: true },
   targetAudience: { 
     type: String, // e.g. "all", or specific ward number

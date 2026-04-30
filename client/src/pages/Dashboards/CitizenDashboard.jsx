@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { PlusCircle, Search, ThumbsUp, MessageSquare, AlertCircle, X, Send } from 'lucide-react';
+import { PlusCircle, Search, ThumbsUp, MessageSquare, AlertCircle, X, Send, Megaphone } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 
 const CitizenDashboard = () => {

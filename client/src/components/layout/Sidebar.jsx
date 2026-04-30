@@ -9,22 +9,24 @@ const Sidebar = () => {
   const getLinks = () => {
     const role = user?.role;
     let links = [
-      { to: '/', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
+      { to: '/', icon: <LayoutDashboard size={20} />, label: role === 'ward_member' ? 'Manage Grievances' : 'Dashboard' },
     ];
 
     if (role === 'citizen') {
       links.push({ to: '/my-grievances', icon: <FileText size={20} />, label: 'My Grievances' });
       links.push({ to: '/mgnrega', icon: <Pickaxe size={20} />, label: 'MGNREGA' });
     } else {
-      links.push({ to: '/grievances', icon: <FileText size={20} />, label: 'Manage Grievances' });
-      links.push({ to: '/announcements', icon: <Megaphone size={20} />, label: 'Announcements' });
       if (role === 'secretary') {
+        links.push({ to: '/grievances', icon: <FileText size={20} />, label: 'Manage Grievances' });
         links.push({ to: '/citizens', icon: <Users size={20} />, label: 'Citizens' });
         links.push({ to: '/mgnrega-requests', icon: <Pickaxe size={20} />, label: 'MGNREGA Requests' });
       } else if (role === 'higher_authority') {
         links.push({ to: '/mgnrega-requests', icon: <Pickaxe size={20} />, label: 'MGNREGA Requests' });
       }
     }
+
+    // Accessible to everyone
+    links.push({ to: '/announcements', icon: <Megaphone size={20} />, label: 'Announcements' });
 
     return links;
   };
