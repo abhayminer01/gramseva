@@ -15,6 +15,18 @@ const AuthorityLogin = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+      setError('Phone number must be exactly 10 digits and start with 6, 7, 8, or 9.');
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      setLoading(false);
+      return;
+    }
     
     // Passing 'auth' to login type
     const res = await login(phone, password, 'auth');
