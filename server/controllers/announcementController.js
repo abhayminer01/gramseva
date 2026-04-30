@@ -34,8 +34,10 @@ const getAnnouncements = async (req, res) => {
   try {
     const { localBodyName, wardNumber } = req.user;
     
-    // Everyone sees 'all', but citizens in ward x also see targetAudience x
-    const filter = { localBody: localBodyName };
+    // Everyone sees their local body announcements AND 'State' level announcements (from higher authority)
+    const filter = {
+      localBody: { $in: [localBodyName, 'State'] }
+    };
     
     // Citizens and Ward Members see 'all' plus their specific ward.
     // Secretaries only see 'all' (they don't need to see every individual ward's local announcements).
@@ -44,7 +46,7 @@ const getAnnouncements = async (req, res) => {
         { targetAudience: 'all' },
         { targetAudience: wardNumber || '' }
       ];
-    } else if (req.user.role === 'secretary') {
+    } else if (req.user.role === 'secretary' || req.user.role === 'higher_authority') {
       filter.targetAudience = 'all';
     }
 

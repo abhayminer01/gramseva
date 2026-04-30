@@ -73,7 +73,7 @@ const Announcements = () => {
     }
   };
 
-  const isAuthority = user.role === 'secretary' || user.role === 'ward_member';
+  const isAuthority = user.role === 'secretary' || user.role === 'ward_member' || user.role === 'higher_authority';
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
