@@ -89,7 +89,12 @@ const Register = () => {
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 tracking-tight">Citizen Registration</h2>
+         <div className="flex justify-center mb-2">
+            <h1 className="text-3xl font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+              GramSeva
+            </h1>
+         </div>
+         <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900 tracking-tight">Citizen Registration</h2>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-lg">
@@ -102,19 +107,19 @@ const Register = () => {
             <div className="grid grid-cols-1 gap-y-5 gap-x-4 sm:grid-cols-2">
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                <input required type="text" name="name" onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm" />
+                <input required type="text" name="name" onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-3 px-3 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm" />
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-sm font-medium text-gray-700">Phone</label>
-                <input required type="tel" name="phone" onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm" />
+                <input required type="tel" name="phone" onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-3 px-3 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm" />
               </div>
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700">Password</label>
-                <input required type="password" name="password" onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm" />
+                <input required type="password" name="password" onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-3 px-3 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm" />
               </div>
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Ration Card Number (Optional)</label>
-                <input type="text" name="rationCardNumber" onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm" />
+                <label className="block text-sm font-medium text-gray-700">Ration Card Number</label>
+                <input type="text" name="rationCardNumber" onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-3 px-3 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm" />
               </div>
               
               <div className="col-span-2 sm:col-span-1">
@@ -122,7 +127,7 @@ const Register = () => {
                 <select 
                   value={selectedDistrict} 
                   onChange={(e) => setSelectedDistrict(e.target.value)} 
-                  className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm"
+                  className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-3 px-3 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm"
                 >
                   {districts.map(d => (
                     <option key={d} value={d}>{d}</option>
@@ -134,7 +139,7 @@ const Register = () => {
                 <select 
                   value={selectedType}
                   onChange={(e) => setSelectedType(e.target.value)} 
-                  className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm"
+                  className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-3 px-3 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm"
                 >
                   <option value="Panchayat">Panchayat</option>
                   <option value="Municipality">Municipality</option>
@@ -148,7 +153,7 @@ const Register = () => {
                   value={formData.localBodyName}
                   onChange={handleChange} 
                   required
-                  className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm"
+                  className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-3 px-3 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm"
                 >
                   {getAvailableBodies().length === 0 && <option value="">No Bodies Found</option>}
                   {getAvailableBodies().map(body => (
@@ -158,7 +163,7 @@ const Register = () => {
               </div>
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-sm font-medium text-gray-700">Ward Number</label>
-                <input required type="text" name="wardNumber" onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm" />
+                <input required type="text" name="wardNumber" onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-3 px-3 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm" />
               </div>
             </div>
 

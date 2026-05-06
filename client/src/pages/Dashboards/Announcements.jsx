@@ -77,14 +77,14 @@ const Announcements = () => {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <div className="flex items-center gap-4">
-          <div className="bg-emerald-100 p-3 rounded-xl">
-            <Megaphone size={28} className="text-emerald-600" />
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="bg-emerald-100 p-2.5 sm:p-3 rounded-xl">
+            <Megaphone size={24} className="text-emerald-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Announcements</h1>
-            <p className="text-gray-500 text-sm">Official updates from {user.localBodyName}</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Announcements</h1>
+            <p className="text-gray-500 text-xs sm:text-sm">Official updates from {user.localBodyName}</p>
           </div>
         </div>
         {isAuthority && (
@@ -94,7 +94,7 @@ const Announcements = () => {
               setFormData({ title: '', content: '', type: 'announcement', targetAudience: user?.role === 'ward_member' ? user.wardNumber : 'all' });
               setShowModal(true);
             }}
-            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold transition-all shadow-lg shadow-emerald-200"
           >
             <Plus size={20} />
             New Announcement
@@ -143,7 +143,7 @@ const Announcements = () => {
                   </div>
                 </div>
                 {isAuthority && (
-                  <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex flex-col gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => handleEdit(ann)}
                       className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"

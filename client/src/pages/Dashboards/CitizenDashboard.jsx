@@ -150,13 +150,13 @@ const CitizenDashboard = () => {
   return (
     <div className="space-y-6 relative">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Ward Grievances</h1>
-          <p className="text-gray-500 text-sm mt-1">View and report issues localized strictly to your connected ward.</p>
+        <div className="w-full sm:w-auto">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Ward Grievances</h1>
+          <p className="text-gray-500 text-sm mt-1">Report issues localized to your ward.</p>
         </div>
         <button 
            onClick={() => setShowModal(true)}
-           className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg font-medium transition-colors shadow-sm"
+           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-emerald-200 active:scale-95"
         >
           <PlusCircle size={20} />
           Report Issue
@@ -168,30 +168,30 @@ const CitizenDashboard = () => {
          <button onClick={() => setActiveTab('fulfilled')} className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors flex-1 sm:flex-none ${activeTab === 'fulfilled' ? 'border-emerald-600 text-emerald-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Fulfilled & Handled</button>
       </div>
 
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col sm:flex-row gap-4 justify-between items-center">
-        <div className="relative w-full sm:w-96">
+      <div className="bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col lg:flex-row gap-4 justify-between items-center">
+        <div className="relative w-full lg:w-96">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search size={18} className="text-gray-400" />
           </div>
           <input
             type="text"
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500 text-sm"
+            className="block w-full pl-10 pr-3 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm outline-none transition-shadow"
             placeholder="Search grievances..."
           />
         </div>
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <span className="text-sm text-gray-500 font-medium">Category:</span>
+        <div className="flex items-center gap-3 w-full lg:w-auto">
+          <span className="text-sm text-gray-500 font-bold hidden sm:block whitespace-nowrap">Filter By:</span>
           <select 
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500 py-2 pl-3 pr-8 outline-none"
+            className="w-full lg:w-auto bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 py-3 pl-3 pr-10 outline-none appearance-none font-bold text-gray-700"
           >
-            <option value="all">All</option>
-            <option value="water">Water</option>
-            <option value="road">Road</option>
+            <option value="all">All Categories</option>
+            <option value="water">Water Supply</option>
+            <option value="road">Roads</option>
             <option value="electricity">Electricity</option>
             <option value="waste">Waste</option>
-            <option value="other">Other</option>
+            <option value="other">Other Issues</option>
           </select>
         </div>
       </div>

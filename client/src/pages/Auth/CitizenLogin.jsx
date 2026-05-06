@@ -42,8 +42,10 @@ const CitizenLogin = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl border border-gray-100">
         <div>
-          <div className="flex justify-center">
-            <img src="/logo.png" alt="GramSeva Logo" className="h-16 w-auto" />
+          <div className="flex justify-center mb-2">
+            <h1 className="text-3xl font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+              GramSeva
+            </h1>
           </div>
           <p className="mt-2 text-center text-sm text-gray-600 font-medium uppercase tracking-wider">
             Citizen Portal

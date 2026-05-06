@@ -85,45 +85,45 @@ const SecretaryDashboard = () => {
     <div className="space-y-8">
 
       {/* Welcome Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-700 via-emerald-600 to-teal-500 rounded-2xl shadow-lg p-8 text-white">
+      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-700 via-emerald-600 to-teal-500 rounded-3xl shadow-lg p-6 sm:p-10 text-white">
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 70% 50%, white 0%, transparent 60%)' }} />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
               <Shield size={18} className="text-emerald-200" />
-              <span className="text-emerald-200 text-sm font-medium uppercase tracking-widest">Secretary Workspace</span>
+              <span className="text-emerald-200 text-[10px] font-bold uppercase tracking-[0.2em]">Administrative Suite</span>
             </div>
-            <h1 className="text-3xl font-extrabold tracking-tight">Welcome, {user.name}</h1>
-            <p className="text-emerald-100 mt-1 text-sm">
-              {user.localBodyType} of <span className="font-semibold text-white">{user.localBodyName}</span>, {user.district}
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight">Welcome, {user.name}</h1>
+            <p className="text-emerald-50/80 text-sm sm:text-base font-medium max-w-lg">
+              Authorized Secretary of <span className="text-white font-bold underline decoration-emerald-400 underline-offset-4">{user.localBodyName}</span>. Manage community growth and requests.
             </p>
           </div>
           <button 
              onClick={() => setShowAnnounceModal(true)}
-             className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm self-start md:self-auto border border-white/30"
+             className="w-full lg:w-auto inline-flex items-center justify-center gap-2 bg-white text-emerald-700 px-6 py-4 rounded-2xl font-bold transition-all shadow-xl hover:bg-emerald-50 active:scale-95"
           >
             <Megaphone size={20} />
-            Publish Announcement
+            Publish Alert
           </button>
         </div>
-        <div className="absolute right-8 top-1/2 -translate-y-1/2 opacity-10">
-          <Activity size={120} strokeWidth={1} />
+        <div className="absolute right-8 bottom-0 translate-y-1/3 opacity-10 hidden lg:block">
+          <Activity size={180} strokeWidth={1} />
         </div>
       </div>
 
       {/* Action Needed Alert */}
       {unapprovedCitizens.length > 0 && (
-        <div className="flex items-center gap-4 bg-amber-50 border border-amber-200 rounded-xl px-6 py-4 shadow-sm">
-          <div className="bg-amber-100 p-2 rounded-lg">
-            <UserCheck size={20} className="text-amber-600" />
+        <div className="flex flex-col sm:flex-row items-center gap-4 bg-amber-50 border border-amber-200 rounded-2xl px-6 py-5 shadow-sm">
+          <div className="bg-amber-100 p-3 rounded-xl">
+            <UserCheck size={24} className="text-amber-600" />
           </div>
-          <div className="flex-1">
-            <p className="font-semibold text-amber-900 text-sm">Action Required</p>
-            <p className="text-amber-700 text-sm">{unapprovedCitizens.length} citizen registration{unapprovedCitizens.length > 1 ? 's' : ''} awaiting your approval.</p>
+          <div className="flex-1 text-center sm:text-left">
+            <p className="font-bold text-amber-900 text-sm">Action Required</p>
+            <p className="text-amber-700 text-xs sm:text-sm mt-0.5">{unapprovedCitizens.length} citizen registration{unapprovedCitizens.length > 1 ? 's' : ''} awaiting your approval.</p>
           </div>
-          <a href="/citizens" className="text-sm font-bold text-amber-700 hover:text-amber-900 underline underline-offset-2 whitespace-nowrap">
-            Review Now →
-          </a>
+          <Link to="/citizens" className="w-full sm:w-auto text-center px-6 py-2.5 bg-amber-600 text-white rounded-xl text-sm font-bold shadow-md shadow-amber-200">
+            Review Now
+          </Link>
         </div>
       )}
 

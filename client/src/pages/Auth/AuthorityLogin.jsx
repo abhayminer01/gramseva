@@ -43,6 +43,11 @@ const AuthorityLogin = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl border-t-4 border-blue-600">
         <div>
+          <div className="flex justify-center mb-2">
+            <h1 className="text-3xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              GramSeva
+            </h1>
+          </div>
           <div className="flex justify-center mb-4">
             <div className="bg-blue-100 p-3 rounded-full">
               <ShieldAlert className="text-blue-600 w-8 h-8" />
